@@ -14,8 +14,8 @@ import java.net.Socket;
 import java.util.Collection;
 
 public class Client {
-//    private static final String HOST = "34.44.208.210";
-    private static final String HOST = "localhost";
+    private static final String HOST = "35.208.184.138";
+//    private static final String HOST = "localhost";
     private static final int PORT = 8080;
     private static final ObjectMapper objectMapper = new ObjectMapper();
     private static final Logger logger = LoggerFactory.getLogger(Client.class);
@@ -35,7 +35,7 @@ public class Client {
             logger.info("Connected to server at {}:{}", HOST, PORT);
 
             {
-                final var json = objectMapper.writeValueAsString(new Request.Authorize("1234"));
+                final var json = objectMapper.writeValueAsString(new Request.Authorize("2345"));
                 writer.write(json);
                 writer.newLine();
                 writer.flush();
