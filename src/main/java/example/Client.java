@@ -3,15 +3,15 @@ package example;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import example.domain.Request;
 import example.domain.Response;
-import example.domain.game.Cave;
-import example.domain.game.Direction;
-import example.domain.game.Player;
+import example.domain.game.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.net.Socket;
+import java.sql.PreparedStatement;
 import java.util.Collection;
+import java.util.Map;
 
 public class Client {
     private static final String HOST = "35.208.184.138";
@@ -42,8 +42,8 @@ public class Client {
                 logger.info("Sent command: {}", json);
             }
 
-            Cave cave;
-            Player player;
+            Cave cave = null;
+            Player player = null;
             Collection<Response.StateLocations.ItemLocation> itemLocations;
             Collection<Response.StateLocations.PlayerLocation> playerLocations;
 
@@ -54,6 +54,7 @@ public class Client {
                 }
 
                 final var response = objectMapper.readValue(line, Response.class);
+                Player finalPlayer = player;
                 switch (response) {
                     case Response.Authorized authorized -> {
                         player = authorized.humanPlayer();
@@ -72,7 +73,11 @@ public class Client {
                         playerLocations = stateLocations.playerLocations();
                         logger.info("itemLocations: {}", itemLocations);
                         logger.info("playerLocations: {}", playerLocations);
-
+                        PreatyPrinter.render(cave, playerLocations, itemLocations);
+                        final var me = playerLocations.stream().filter(playerLocation -> playerLocation.entity().equals(finalPlayer)).findAny().get();
+                        System.out.println(me.location());
+                        MyFinder mf = new MyFinder();
+                        mf.findPath(cave,playerLocations,itemLocations,me);
                         final var cmd = new Request.Command(Direction.Up);
                         final var cmdJson = objectMapper.writeValueAsString(cmd);
                         writer.write(cmdJson);
@@ -81,6 +86,8 @@ public class Client {
                         logger.info("Sent command: {}", cmd);
                     }
                 }
+                
+               //
             }
         } catch (IOException e) {
             logger.error("Error in client operation", e);
